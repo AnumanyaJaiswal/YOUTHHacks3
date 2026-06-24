@@ -1,0 +1,1 @@
+// AccessibilityToggle.jsx
