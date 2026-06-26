@@ -1,7 +1,7 @@
-import VoiceAssistant from "./components/VoiceAssistant";
+import Home from "./pages/Home";
 
 function App() {
-  return <VoiceAssistant />;
+  return <Home />;
 }
 
 export default App;
