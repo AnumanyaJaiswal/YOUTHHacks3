@@ -1,35 +1,52 @@
 // VoiceAssistant.jsx
-
 import { useState } from "react";
+import { startListening } from "../services/speech";
+import { detectIntent } from "../services/gemini";
 
 export default function VoiceAssistant({
   handleVoiceInput,
 }) {
   const [status, setStatus] = useState("Ready");
-  const isListening = status === "Listening...";
-  const startListening = () => {
-    setStatus("Listening...");
+const [transcript, setTranscript] = useState("");
+const [error, setError] = useState("");
 
-    const recognition =
-      new window.webkitSpeechRecognition();
+const isListening = status === "Listening...";
+ const handleMicClick = () => {
+  setError("");
 
-    recognition.lang = "en-IN";
+  startListening({
+    onStart: () => {
+      setStatus("Listening...");
+    },
 
-    recognition.onresult = (event) => {
-      const transcript =
-        event.results[0][0].transcript;
+    onResult: async (text) => {
+      setTranscript(text);
+      setStatus("Detecting Intent...");
 
-      handleVoiceInput(transcript);
+      try {
+        const result = await detectIntent(text);
 
-      setStatus("Processing...");
-    };
+        handleVoiceInput(result.intent);
 
-    recognition.onend = () => {
-      setStatus("Ready");
-    };
+        setStatus(`Intent: ${result.intent}`);
+      } catch (err) {
+        console.error(err);
+        setError("Intent detection failed");
+        setStatus("Error");
+      }
+    },
 
-    recognition.start();
-  };
+    onError: (err) => {
+      console.error(err);
+      setError(err);
+      setStatus("Error");
+    },
+
+    onEnd: () => {
+      console.log("Recognition ended");
+    },
+  });
+};
 
   return (
     <div className="relative overflow-hidden rounded-4xl bg-white border border-slate-200 shadow-[0_20px_80px_rgba(15,23,42,0.12)] p-10">
@@ -58,8 +75,8 @@ export default function VoiceAssistant({
 
         <div className="flex justify-center mt-10">
 
-          <button
-            onClick={startListening}
+        <button
+  onClick={handleMicClick}
             className={`
               group
               relative
@@ -104,24 +121,50 @@ export default function VoiceAssistant({
           </div>
 
         </div>
+        {transcript && (
+  <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <p className="text-sm text-slate-500">
+      Transcript
+    </p>
+
+    <p className="mt-2 font-medium text-slate-800">
+      {transcript}
+    </p>
+  </div>
+)}
+
+{error && (
+  <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-3 text-red-600">
+    {error}
+  </div>
+)}
 
         {/* Suggestions */}
 
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
+     <div className="mt-8 flex flex-wrap justify-center gap-3">
 
-          <button className="px-4 py-2 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-            My card is lost
-          </button>
+  <button
+    onClick={() => handleVoiceInput("BLOCK_CARD")}
+    className="px-4 py-2 rounded-full bg-blue-50 text-blue-700 border border-blue-100"
+  >
+    My card is lost
+  </button>
 
-          <button className="px-4 py-2 rounded-full bg-green-50 text-green-700 border border-green-100">
-            Check my balance
-          </button>
+  <button
+    onClick={() => handleVoiceInput("BALANCE")}
+    className="px-4 py-2 rounded-full bg-green-50 text-green-700 border border-green-100"
+  >
+    Check my balance
+  </button>
 
-          <button className="px-4 py-2 rounded-full bg-orange-50 text-orange-700 border border-orange-100">
-            Fraud Help
-          </button>
+  <button
+    onClick={() => handleVoiceInput("FRAUD")}
+    className="px-4 py-2 rounded-full bg-orange-50 text-orange-700 border border-orange-100"
+  >
+    Fraud Help
+  </button>
 
-        </div>
+</div>
 
       </div>
     </div>
