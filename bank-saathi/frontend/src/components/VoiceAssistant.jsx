@@ -1,5 +1,5 @@
 // VoiceAssistant.jsx
-import { useState } from "react";
+import { useState , useRef} from "react";
 import { startListening } from "../services/speech";
 import { detectIntent } from "../services/gemini";
 
@@ -10,6 +10,8 @@ export default function VoiceAssistant({
 const [transcript, setTranscript] = useState("");
 const [error, setError] = useState("");
 
+  const timeoutRef = useRef(null);
+
 const isListening = status === "Listening...";
  const handleMicClick = () => {
   setError("");
@@ -17,9 +19,16 @@ const isListening = status === "Listening...";
   startListening({
     onStart: () => {
       setStatus("Listening...");
+
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        setStatus("Ready")
+      }, 5000);
     },
 
     onResult: async (text) => {
+      clearTimeout(timeoutRef.current);
+
       setTranscript(text);
       setStatus("Detecting Intent...");
 
@@ -37,12 +46,16 @@ const isListening = status === "Listening...";
     },
 
     onError: (err) => {
+      clearTimeout(timeoutRef.current);
+
       console.error(err);
       setError(err);
       setStatus("Error");
     },
 
     onEnd: () => {
+      clearTimeout(timeoutRef.current);
+
       console.log("Recognition ended");
     },
   });
@@ -76,10 +89,11 @@ const isListening = status === "Listening...";
         <div className="flex justify-center mt-10">
 
         <button
-  onClick={handleMicClick}
+            onClick={handleMicClick}
             className={`
               group
               relative
+              cursor-pointer
               flex
               items-center
               justify-center

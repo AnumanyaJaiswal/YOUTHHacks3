@@ -37,6 +37,7 @@ export default function QuickActions({ handleAction }) {
             bg-linear-to-r
             ${action.color}
             rounded-3xl
+            cursor-pointer
             p-6
             text-white
             shadow-lg
