@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Navbar from "../components/Navbar";
 
 import VoiceAssistant from "../components/VoiceAssistant";
 import WorkflowTimeline from "../components/WorkflowTimeline";
@@ -110,23 +111,10 @@ export default function Home() {
     <div className="relative max-w-7xl mx-auto px-6 py-8">
 
       {/* Header */}
-
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-slate-900">
-            Bank Saathi
-          </h1>
-
-          <p className="text-slate-500 mt-2">
-            Explainable Voice-First Banking Assistant
-          </p>
-        </div>
-
-        <AccessibilityToggle
-          accessibility={accessibility}
-          setAccessibility={setAccessibility}
-        />
-      </div>
+      <Navbar 
+        accessibility={accessibility}
+        setAccessibility={setAccessibility}
+      />
 
       {/* Hero Section */}
 
